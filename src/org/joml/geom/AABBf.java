@@ -613,4 +613,18 @@ public class AABBf {
 		return this;
 	}
 	
+	public boolean inside(float px, float py, float pz) {
+		return
+				px >= originX-extentX && px <= originX+extentX &&
+				py >= originY-extentY && py <= originY+extentY &&
+				pz >= originZ-extentZ && pz <= originZ+extentZ;
+	}
+	
+	public boolean inside(Vector3f p) {
+		return
+				p.x >= originX-extentX && p.x <= originX+extentX &&
+				p.y >= originY-extentY && p.y <= originY+extentY &&
+				p.z >= originZ-extentZ && p.z <= originZ+extentZ;
+	}
+	
 }
