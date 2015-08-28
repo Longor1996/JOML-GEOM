@@ -317,4 +317,67 @@ public class Intersections {
 		return distToRay < 0.1 ? distToRayOrigin : Float.POSITIVE_INFINITY;
 	}
 	
+	public static final float intersectRayWithTriangle(Rayf ray, Vector3f point1, Vector3f point2, Vector3f point3){
+		// unwrap ray onto stack
+		float rayOrgX = ray.originX;
+		float rayOrgY = ray.originY;
+		float rayOrgZ = ray.originZ;
+		float rayDirX = ray.directionX;
+		float rayDirY = ray.directionY;
+		float rayDirZ = ray.directionZ;
+		
+		float edge1X = point2.x - point1.x;
+		float edge1Y = point2.y - point1.y;
+		float edge1Z = point2.z - point1.z;
+		
+		float edge2X = point3.x - point1.x;
+		float edge2Y = point3.y - point1.y;
+		float edge2Z = point3.z - point1.z;
+		
+		// Find the cross product of edge2 and the ray direction
+		float s1X = rayDirY * edge2Z - rayDirZ * edge2Y;
+		float s1Y = rayDirZ * edge2X - rayDirX * edge2Z;
+		float s1Z = rayDirX * edge2Y - rayDirY * edge2X;
+		
+		// Find the divisor, if its zero, return false as the triangle is
+		// degenerated
+		final float divisor = s1X*edge1X + s1Y*edge1Y + s1Z*edge1Z;
+		
+		if (divisor == 0.0) {
+			return Float.POSITIVE_INFINITY;
+		}
+		
+		// A inverted divisor, as multiplying is faster then division
+		final float invDivisor = 1 / divisor;
+		
+		// Calculate the first barycentic coordinate. Barycentic coordinates
+		// are between 0.0 and 1.0
+		final float distanceX = rayOrgX - point1.x;
+		final float distanceY = rayOrgY - point1.y;
+		final float distanceZ = rayOrgZ - point1.z;
+		
+		final float barycCoord_1 = (distanceX*s1X+distanceY*s1Y+distanceZ*s1Z) * invDivisor;
+		
+		if ((barycCoord_1 < 0.0) || (barycCoord_1 > 1.0)) {
+			return Float.POSITIVE_INFINITY;
+		}
+		
+		final float s2X = distanceY * edge1Z - distanceZ * edge1Y;
+		final float s2Y = distanceZ * edge1X - distanceX * edge1Z;
+		final float s2Z = distanceX * edge1Y - distanceY * edge1X;
+			
+		final float barycCoord_2 = (rayDirX*s2X+rayDirY*s2Y+rayDirZ*s2Z) * invDivisor;
+		
+		if ((barycCoord_2 < 0.0) || ((barycCoord_1 + barycCoord_2) > 1.0)) {
+			return Float.POSITIVE_INFINITY;
+		}
+		
+		// After doing the barycentic coordinate test we know if the ray hits or
+		// not. If we got this far the ray hits.
+		// Calculate the distance to the intersection point
+		final float intersectionDistance = (edge2X*s2X+edge2Y*s2Y+edge2Z*s2Z) * invDivisor;
+		
+		return intersectionDistance >= 0 ? intersectionDistance : Float.POSITIVE_INFINITY;
+	}
+	
 }
