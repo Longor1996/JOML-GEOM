@@ -112,6 +112,16 @@ public class Intersections {
 		return intersectRayWithPlane(ray, BACK, ORIGIN);
 	}
 	
+	public static final float intersectRayWithPlaneInBox(Rayf ray, Vector3f normal, Vector3f point, AABBf aabb) {
+		float t = intersectRayWithPlane(ray, normal, point);
+		
+		float px = ray.originX + ray.directionX * t;
+		float py = ray.originY + ray.directionY * t;
+		float pz = ray.originZ + ray.directionZ * t;
+		
+		return aabb.inside(px, py, pz) ? t : Float.POSITIVE_INFINITY;
+	}
+	
 	/** Warning: Not yet tested. **/
 	public static final float intersectRayWithDisk(Rayf ray, Vector3f n, Vector3f p0, float radius) {
 		float planeIntersect = intersectRayWithPlane(ray, n, p0);
