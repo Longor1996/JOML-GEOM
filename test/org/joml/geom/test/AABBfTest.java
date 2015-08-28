@@ -3,13 +3,13 @@ package org.joml.geom.test;
 import junit.framework.TestCase;
 
 import org.joml.Vector3f;
-import org.joml.geom.AABBf;
+import org.joml.geom.Aabbf;
 
 public class AABBfTest extends TestCase {
 	
 	public void testOverlap() {
-		AABBf a = new AABBf();
-		AABBf b = new AABBf();
+		Aabbf a = new Aabbf();
+		Aabbf b = new Aabbf();
 		
 		a.set(1, 1, 1,/**/ 0, 0, 0);
 		b.set(1, 1, 1,/**/ 0.5f, 0.5f, 0.5f);
@@ -25,8 +25,8 @@ public class AABBfTest extends TestCase {
 	}
 	
 	public void testDistance() {
-		assertEquals(4f , new AABBf().minDistanceSquared(new Vector3f(0,3,0)), Math.ulp(1));
-		assertEquals(12f, new AABBf().minDistanceSquared(new Vector3f(3,3,3)), Math.ulp(1));
+		assertEquals(4f , new Aabbf().minDistanceSquared(new Vector3f(0,3,0)), Math.ulp(1));
+		assertEquals(12f, new Aabbf().minDistanceSquared(new Vector3f(3,3,3)), Math.ulp(1));
 	}
 	
 }

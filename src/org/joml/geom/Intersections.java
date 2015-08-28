@@ -19,9 +19,9 @@ public class Intersections {
 	private static final Vector3f BACK = new Vector3f(0,0,-1);
 	
 	/**
-	 * @return True, if the given {@link AABBf} intersects the given frustum.
+	 * @return True, if the given {@link Aabbf} intersects the given frustum.
 	 **/
-	public static final boolean intersectAabbWithFrustum(AABBf aabb, FrustumCuller culler) {
+	public static final boolean intersectAabbWithFrustum(Aabbf aabb, FrustumCuller culler) {
 		return culler.isAabInsideFrustum(
 				aabb.originX - aabb.extentX,
 				aabb.originY - aabb.extentY,
@@ -36,22 +36,22 @@ public class Intersections {
 	 * @param aabb The AABB.
 	 * @param position The center of the sphere.
 	 * @param radius The radius of the sphere.
-	 * @return True, if the given {@link AABBf} overlaps with the sphere defined by the given position and radius. False if not.
+	 * @return True, if the given {@link Aabbf} overlaps with the sphere defined by the given position and radius. False if not.
 	 **/
-	public static final boolean intersectAabbWithSphere(AABBf aabb, Vector3f position, float radius) {
+	public static final boolean intersectAabbWithSphere(Aabbf aabb, Vector3f position, float radius) {
 		return aabb.minDistanceSquared(position) <= (radius*radius);
 	}
 	
 	/**
 	 * @param aabb The AABB.
 	 * @param sphere The sphere
-	 * @return True, if the given {@link AABBf} overlaps with the given sphere. False if not.
+	 * @return True, if the given {@link Aabbf} overlaps with the given sphere. False if not.
 	 **/
-	public static final boolean intersectAabbWithSphere(AABBf aabb, Spheref sphere) {
+	public static final boolean intersectAabbWithSphere(Aabbf aabb, Spheref sphere) {
 		return aabb.minDistanceSquared(sphere.centerX,sphere.centerY,sphere.centerZ) <= sphere.getRadiusSquared();
 	}
 	
-	public static final boolean intersectAabbWithAabb(AABBf aabbA, AABBf aabbB) {
+	public static final boolean intersectAabbWithAabb(Aabbf aabbA, Aabbf aabbB) {
 		return aabbA.intersect(aabbB);
 	}
 	
@@ -112,7 +112,7 @@ public class Intersections {
 		return intersectRayWithPlane(ray, BACK, ORIGIN);
 	}
 	
-	public static final float intersectRayWithPlaneInBox(Rayf ray, Vector3f normal, Vector3f point, AABBf aabb) {
+	public static final float intersectRayWithPlaneInBox(Rayf ray, Vector3f normal, Vector3f point, Aabbf aabb) {
 		float t = intersectRayWithPlane(ray, normal, point);
 		
 		float px = ray.originX + ray.directionX * t;
@@ -178,7 +178,7 @@ public class Intersections {
 		return (t1 > 0 ? t1 : t2);
 	}
 	
-	public static final float intersect(Rayf ray, AABBf aabb) {
+	public static final float intersect(Rayf ray, Aabbf aabb) {
 		float lbX = aabb.originX - aabb.extentX;
 		float lbY = aabb.originY - aabb.extentY;
 		float lbZ = aabb.originZ - aabb.extentZ;
