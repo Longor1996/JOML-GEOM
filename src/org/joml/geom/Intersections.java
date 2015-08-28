@@ -178,7 +178,7 @@ public class Intersections {
 		return (t1 > 0 ? t1 : t2);
 	}
 	
-	public static final float intersect(Rayf ray, Aabbf aabb) {
+	public static final float intersectRayWithAabb(Rayf ray, Aabbf aabb) {
 		float lbX = aabb.originX - aabb.extentX;
 		float lbY = aabb.originY - aabb.extentY;
 		float lbZ = aabb.originZ - aabb.extentZ;
@@ -378,6 +378,59 @@ public class Intersections {
 		final float intersectionDistance = (edge2X*s2X+edge2Y*s2Y+edge2Z*s2Z) * invDivisor;
 		
 		return intersectionDistance >= 0 ? intersectionDistance : Float.POSITIVE_INFINITY;
+	}
+	
+	/**
+	 * @return <ul>
+	 * 					<li> 0: No Intersection
+	 * 					<li> 1: Point Intersection
+	 * 					<li> 2: Line Intersection
+	 * 				</ul>
+	 **/
+	public static final int intersectLineWithPlane(Vector3f Sp0, Vector3f Sp1, Vector3f pNormal, Vector3f pPoint, Vector3f store) {
+		// Vector3f  u = Sp1 - Sp0;
+		float uX = Sp1.x - Sp0.x;
+		float uY = Sp1.y - Sp0.y;
+		float uZ = Sp1.z - Sp0.z;
+		
+		// Vector3f  w = Sp0 - Pn.V0;
+		float wX = Sp0.x - pPoint.x;
+		float wY = Sp0.y - pPoint.y;
+		float wZ = Sp0.z - pPoint.z;
+		
+		float D = pNormal.x*uX+pNormal.y*uY+pNormal.z*uZ; // normal DOT u
+		float N = -(pNormal.x*wX+pNormal.y*wY+pNormal.z*wZ); // normal DOT w
+		
+		if (abs(D) < Float.MIN_VALUE) {
+			// segment is parallel to plane
+			if (N == 0)
+				// segment lies in plane
+				return 2;
+			else
+				// no intersection
+				return 0;
+		}
+		
+		// they are not parallel
+		// compute intersect parameter
+		float sI = N / D;
+		if (sI < 0 || sI > 1)
+			// no intersection
+			return 0;
+		
+		// compute segment intersect point
+		// store = S.P0 + sI * u;
+		store.set(
+				Sp0.x + sI * uX,
+				Sp0.y + sI * uY,
+				Sp0.z + sI * uZ
+		);
+		
+		return 1;
+	}
+	
+	private static float abs(final float x) {
+		return Float.intBitsToFloat(0x7fffffff & Float.floatToRawIntBits(x));
 	}
 	
 }
