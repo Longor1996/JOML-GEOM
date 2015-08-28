@@ -1,5 +1,7 @@
 package org.joml.geom;
 
+import java.util.Collection;
+
 import org.joml.Vector3f;
 
 /**
@@ -399,7 +401,7 @@ public class AABBf {
 		return this;
 	}
 	
-	public boolean overlap(AABBf aabb) {
+	public boolean intersect(AABBf aabb) {
 		// XXX: The 'abs'-method could be inlined manually here.
 		if (abs(originX - aabb.originX) >= (extentX + aabb.extentX) ) return false;
 		if (abs(originY - aabb.originY) >= (extentY + aabb.extentY) ) return false;
@@ -428,6 +430,19 @@ public class AABBf {
 	
 	/**
 	 * Calculates the minimum distance between this {@link AABBf} and the given point.
+	 * @return The squared minimum distance between this {@link AABBf} and the given point.
+	 **/
+	public float minDistanceSquared(float x, float y, float z) {
+		// Squared distance
+		float sq = 0f;
+		sq += minDistanceSquared_sub( x, originX-extentX, originX+extentX);
+		sq += minDistanceSquared_sub( y, originY-extentY, originY+extentY);
+		sq += minDistanceSquared_sub( z, originZ-extentZ, originZ+extentZ);
+		return sq;
+	}
+	
+	/**
+	 * Calculates the minimum distance between this {@link AABBf} and the given point.
 	 * @return The minimum distance between this {@link AABBf} and the given point.
 	 **/
 	public float minDistance(Vector3f point) {
@@ -449,6 +464,153 @@ public class AABBf {
 		}
 		
 		return out;
+	}
+	
+	/**
+	 * Calculates the overlap between this {@link AABBf} and the 'load' {@link AABBf}, and stores the result in the 'store' {@link AABBf}.
+	 * @param load The bounding box to overlap with.
+	 * @param store The bounding box to store the overlap region in.
+	 * @return True, if the {@link AABBf}'s are overlapping. False if not.
+	 **/
+	public boolean overlapBoxes(AABBf load, AABBf store) {
+		// Check if there is any overlap...
+		if (abs(originX - load.originX) >= (extentX + load.extentX) ) return false;
+		if (abs(originY - load.originY) >= (extentY + load.extentY) ) return false;
+		if (abs(originZ - load.originZ) >= (extentZ + load.extentZ) ) return false;
+		
+		// There is overlap, continue...
+		
+		// Get MIN/MAX points for A ('this')
+		float AminX = originX - extentX;
+		float AminY = originY - extentY;
+		float AminZ = originZ - extentZ;
+		float AmaxX = originX + extentX;
+		float AmaxY = originY + extentY;
+		float AmaxZ = originZ + extentZ;
+		
+		// Get MIN/MAX points for B ('load')
+		float BminX = load.originX - load.extentX;
+		float BminY = load.originY - load.extentY;
+		float BminZ = load.originZ - load.extentZ;
+		float BmaxX = load.originX + load.extentX;
+		float BmaxY = load.originY + load.extentY;
+		float BmaxZ = load.originZ + load.extentZ;
+		
+		// Extract overlap...
+		float OUTminX = Math.max(AminX, BminX);
+		float OUTminY = Math.max(AminY, BminY);
+		float OUTminZ = Math.max(AminZ, BminZ);
+		
+		float OUTmaxX = Math.min(AmaxX, BmaxX);
+		float OUTmaxY = Math.min(AmaxY, BmaxY);
+		float OUTmaxZ = Math.min(AmaxZ, BmaxZ);
+		
+		// Calculate extents and origin for overlap...
+		// overlap.origin = (min+max)/2 = minPlusMax/2
+		float OUToriginX = (OUTminX+OUTmaxX) / 2f;
+		float OUToriginY = (OUTminY+OUTmaxY) / 2f;
+		float OUToriginZ = (OUTminZ+OUTmaxZ) / 2f;
+		
+		// overlap.extent = (max-min)/2 = size/2
+		float OUTextentX = (OUTmaxX-OUTminX) / 2f;
+		float OUTextentY = (OUTmaxY-OUTminY) / 2f;
+		float OUTextentZ = (OUTmaxZ-OUTminZ) / 2f;
+		
+		// Store result in 'store'!
+		store.set(OUTextentX, OUTextentY, OUTextentZ, OUToriginX, OUToriginY, OUToriginZ);
+		
+		// There is overlap, so return true.
+		return true;
+	}
+	
+	public AABBf surroundPointsWithBox(Vector3f[] points) {
+		float minX = 0;
+		float minY = 0;
+		float minZ = 0;
+		float maxX = 0;
+		float maxY = 0;
+		float maxZ = 0;
+		float x = 0;
+		float y = 0;
+		float z = 0;
+		
+		for(Vector3f point : points) {
+			// we will do a lot of checks,
+			// so we unwrap the point to the stack
+			x = point.x;
+			y = point.y;
+			z = point.z;
+			
+			// check MINIMUM
+			minX = x < minX ? x : minX;
+			minY = y < minY ? y : minY;
+			minZ = z < minZ ? z : minZ;
+			// check MAXIMUM
+			maxX = x > maxX ? x : maxX;
+			maxY = y > maxY ? y : maxY;
+			maxZ = z > maxZ ? z : maxZ;
+		}
+		
+		// Calculate extents and origin for bounds...
+		// bounds.origin = (min+max)/2 = minPlusMax/2
+		float OUToriginX = (minX+maxX) / 2f;
+		float OUToriginY = (minY+maxY) / 2f;
+		float OUToriginZ = (minZ+maxZ) / 2f;
+		
+		// bounds.extent = (max-min)/2 = size/2
+		float OUTextentX = (maxX-minX) / 2f;
+		float OUTextentY = (maxY-minY) / 2f;
+		float OUTextentZ = (maxZ-minZ) / 2f;
+		
+		// Store result in 'this'!
+		set(OUTextentX, OUTextentY, OUTextentZ, OUToriginX, OUToriginY, OUToriginZ);
+		
+		return this;
+	}
+	
+	public AABBf surroundPointsWithBox(Collection<Vector3f> points) {
+		float minX = 0;
+		float minY = 0;
+		float minZ = 0;
+		float maxX = 0;
+		float maxY = 0;
+		float maxZ = 0;
+		float x = 0;
+		float y = 0;
+		float z = 0;
+		
+		for(Vector3f point : points) {
+			// we will do a lot of checks,
+			// so we unwrap the point to the stack
+			x = point.x;
+			y = point.y;
+			z = point.z;
+			
+			// check MINIMUM
+			minX = x < minX ? x : minX;
+			minY = y < minY ? y : minY;
+			minZ = z < minZ ? z : minZ;
+			// check MAXIMUM
+			maxX = x > maxX ? x : maxX;
+			maxY = y > maxY ? y : maxY;
+			maxZ = z > maxZ ? z : maxZ;
+		}
+		
+		// Calculate extents and origin for bounds...
+		// bounds.origin = (min+max)/2 = minPlusMax/2
+		float OUToriginX = (minX+maxX) / 2f;
+		float OUToriginY = (minY+maxY) / 2f;
+		float OUToriginZ = (minZ+maxZ) / 2f;
+		
+		// bounds.extent = (max-min)/2 = size/2
+		float OUTextentX = (maxX-minX) / 2f;
+		float OUTextentY = (maxY-minY) / 2f;
+		float OUTextentZ = (maxZ-minZ) / 2f;
+		
+		// Store result in 'this'!
+		set(OUTextentX, OUTextentY, OUTextentZ, OUToriginX, OUToriginY, OUToriginZ);
+		
+		return this;
 	}
 	
 }

@@ -13,15 +13,15 @@ public class AABBfTest extends TestCase {
 		
 		a.set(1, 1, 1,/**/ 0, 0, 0);
 		b.set(1, 1, 1,/**/ 0.5f, 0.5f, 0.5f);
-		assertTrue("A and B should overlap, but they don't.",a.overlap(b));
+		assertTrue("A and B should intersect, but they don't.",a.intersect(b));
 		
 		a.set(1, 1, 1,/**/ 0, 0, 0);
 		b.set(1, 1, 1,/**/ 0, 2, 0);
-		assertTrue("A and B should NOT overlap, but they do.",!a.overlap(b));
+		assertTrue("A and B should NOT intersect, but they do.",!a.intersect(b));
 		
 		a.set(1, 1, 1,/**/ 0, 0, 0);
 		b.set(1, 1, 1,/**/ -1.5f, -1, -1.5f);
-		assertTrue("A and B should overlap, but they don't.", a.overlap(b));
+		assertTrue("A and B should intersect, but they don't.", a.intersect(b));
 	}
 	
 	public void testDistance() {
