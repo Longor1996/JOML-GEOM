@@ -3,6 +3,10 @@ package org.joml.geom;
 import org.joml.FrustumCuller;
 import org.joml.Vector3f;
 
+/**
+ * This class contains utility methods for intersections between various geometric shapes.
+ * Note: The ray intersection methods always return the distance to the 'hit point', or positive infinity if there is no hit.
+ **/
 public class Intersections {
 	
 	/**
@@ -131,4 +135,51 @@ public class Intersections {
 		return (t1 > 0 ? t1 : t2);
 	}
 	
+	public static final float intersect(Rayf ray, AABBf aabb) {
+		float lbX = aabb.originX - aabb.extentX;
+		float lbY = aabb.originY - aabb.extentY;
+		float lbZ = aabb.originZ - aabb.extentZ;
+		
+		float rtX = aabb.originX + aabb.extentX;
+		float rtY = aabb.originY + aabb.extentY;
+		float rtZ = aabb.originZ + aabb.extentZ;
+		
+		// ray.directionXYZ is unit direction vector of ray
+		// take inverse of ray direction
+		float dirfracX = 1.0f / ray.directionX;
+		float dirfracY = 1.0f / ray.directionY;
+		float dirfracZ = 1.0f / ray.directionZ;
+		
+		// LB.XYZ is the corner of AABB with minimal coordinates, RT.XYZ is maximal corner
+		// ray.originXYZ is origin of ray
+		float t1 = (lbX - ray.originX)*dirfracX;
+		float t2 = (rtX - ray.originX)*dirfracX;
+		float t3 = (lbY - ray.originY)*dirfracY;
+		float t4 = (rtY - ray.originY)*dirfracY;
+		float t5 = (lbZ - ray.originZ)*dirfracZ;
+		float t6 = (rtZ - ray.originZ)*dirfracZ;
+		
+		// This is some insane min/max-ing.
+		float tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
+		float tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
+		
+		float t = Float.POSITIVE_INFINITY;
+		
+		// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is behind us
+		if (tmax < 0)
+		{
+			t = tmax;
+			return Float.POSITIVE_INFINITY;
+		}
+		
+		// if tmin > tmax, ray doesn't intersect AABB
+		if (tmin > tmax)
+		{
+			t = tmax;
+			return Float.POSITIVE_INFINITY;
+		}
+		
+		t = tmin;
+		return t;
+	}
 }
