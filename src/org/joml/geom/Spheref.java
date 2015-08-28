@@ -3,10 +3,10 @@ package org.joml.geom;
 import org.joml.Vector3f;
 
 public class Spheref {
-	float centerX;
-	float centerY;
-	float centerZ;
-	float radius;
+	public float centerX;
+	public float centerY;
+	public float centerZ;
+	public float radius;
 	
 	public Spheref() {
 		centerX = 0;
