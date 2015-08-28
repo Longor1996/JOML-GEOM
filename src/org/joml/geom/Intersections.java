@@ -8,6 +8,15 @@ import org.joml.Vector3f;
  * Note: The ray intersection methods always return the distance to the 'hit point', or positive infinity if there is no hit.
  **/
 public class Intersections {
+	// The vectors defined here are private for the
+	// simple reason that they should NOT BE CHANGED.
+	private static final Vector3f ORIGIN = new Vector3f();
+	private static final Vector3f RIGHT = new Vector3f(1,0,0);
+	private static final Vector3f UP    = new Vector3f(0,1,0);
+	private static final Vector3f FRONT = new Vector3f(0,0,1);
+	private static final Vector3f LEFT = new Vector3f(-1,0,0);
+	private static final Vector3f DOWN = new Vector3f(0,-1,0);
+	private static final Vector3f BACK = new Vector3f(0,0,-1);
 	
 	/**
 	 * @return True, if the given {@link AABBf} intersects the given frustum.
@@ -77,6 +86,30 @@ public class Intersections {
 		
 		// float : RET = -((NDO + NNDP) / NDR)
 		return -((NDO + NNDP) / NDR);
+	}
+	
+	public static final float intersectRayWithPositiveXAxisPlane(Rayf ray) {
+		return intersectRayWithPlane(ray, RIGHT, ORIGIN);
+	}
+	
+	public static final float intersectRayWithPositiveYAxisPlane(Rayf ray) {
+		return intersectRayWithPlane(ray, UP, ORIGIN);
+	}
+	
+	public static final float intersectRayWithPositiveZAxisPlane(Rayf ray) {
+		return intersectRayWithPlane(ray, FRONT, ORIGIN);
+	}
+	
+	public static final float intersectRayWithNegativeXAxisPlane(Rayf ray) {
+		return intersectRayWithPlane(ray, LEFT, ORIGIN);
+	}
+	
+	public static final float intersectRayWithNegativeYAxisPlane(Rayf ray) {
+		return intersectRayWithPlane(ray, DOWN, ORIGIN);
+	}
+	
+	public static final float intersectRayWithNegativeZAxisPlane(Rayf ray) {
+		return intersectRayWithPlane(ray, BACK, ORIGIN);
 	}
 	
 	/** Warning: Not yet tested. **/
@@ -273,7 +306,5 @@ public class Intersections {
 		// return the distance to the point that is the nearest.
 		return distToRay < 0.1 ? distToRayOrigin : Float.POSITIVE_INFINITY;
 	}
-	
-	
 	
 }
