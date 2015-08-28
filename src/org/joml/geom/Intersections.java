@@ -182,4 +182,98 @@ public class Intersections {
 		t = tmin;
 		return t;
 	}
+	
+	public static float intersectRayWithLine(Rayf ray, Vector3f lineStart,Vector3f lineEnd){
+		float uX = ray.directionX;
+		float uY = ray.directionY;
+		float uZ = ray.directionZ;
+		
+		float vX = lineEnd.x - lineStart.x;
+		float vY = lineEnd.y - lineStart.y;
+		float vZ = lineEnd.z - lineStart.z;
+		
+		float wX = ray.originX - lineStart.x;
+		float wY = ray.originY - lineStart.y;
+		float wZ = ray.originZ - lineStart.z;
+		
+		float a = uX * uX + uY * uY + uZ * uZ;	// always >= 0
+		float b = uX * vX + uY * vY + uZ * vZ;
+		float c = vX * vX + vY * vY + vZ * vZ;	// always >= 0
+		float d = uX * wX + uY * wY + uZ * wZ;
+		float e = vX * wX + vY * wY + vZ * wZ;
+		float D = (a*c) - (b*b);	// always >= 0
+		float sc, sN, sD = D;	// sc = sN / sD, default sD = D >= 0
+		float tc, tN, tD = D;	// tc = tN / tD, default tD = D >= 0
+		
+		final float epsilon = (float) Math.E;
+		
+		// compute the line parameters of the two closest points
+		if (D < epsilon) {	// the lines are almost parallel
+			sN = 0F;			// force using point P0 on segment S1
+			sD = 1F;			// to prevent possible division by 0.0 later
+			tN = e;
+			tD = c;
+		}
+		else {				// get the closest points on the infinite lines
+			sN = ((b*e) - (c*d));
+			tN = ((a*e) - (b*d));
+			if (sN < 0.0) {	// sc < 0 => the s=0 edge is visible
+				sN = 0.0f;
+				tN = e;
+				tD = c;
+			}
+		}
+		
+		if (tN < 0.0) {		// tc < 0 => the t=0 edge is visible
+			tN = 0.0f;
+			// recompute sc for this edge
+			if (-d < 0.0) {
+				sN = 0.0f;
+			} else {
+				sN = -d;
+				sD = a;
+			}
+		}
+		else if (tN > tD) {	  // tc > 1 => the t=1 edge is visible
+			tN = tD;
+			// recompute sc for this edge
+			if ((-d + b) < 0.0) {
+				sN = 0;
+			} else {
+				sN = (-d + b);
+				sD = a;
+			}
+		}
+		
+		// finally do the division to get sc and tc
+		sc = (Math.abs(sN) < epsilon ? 0.0f : sN / sD);
+		tc = (Math.abs(tN) < epsilon ? 0.0f : tN / tD);
+		
+		float uscX = uX * sc;
+		float uscY = uY * sc;
+		float uscZ = uZ * sc;
+		
+		float vtcX = vX * tc;
+		float vtcY = vY * tc;
+		float vtcZ = vZ * tc;
+		
+		// get the difference of the two closest points
+		
+		// = S1(sc) - S2(tc)
+		float dpX = wX + (uscX - vtcX);
+		float dpY = wY + (uscY - vtcY);
+		float dpZ = wZ + (uscZ - vtcZ);
+		
+		float distToRay = (float) Math.sqrt(dpX*dpX+dpY*dpY+dpZ*dpZ);
+		float uscLEN = (float) Math.sqrt(uscX*uscX+uscY*uscY+uscZ*uscZ);
+		float vtcLEN = (float) Math.sqrt(vtcX*vtcX+vtcY*vtcY+vtcZ*vtcZ);
+		
+		float distToRayOrigin = (float) Math.min(uscLEN, vtcLEN);
+		
+		// return the distance to the point that is the nearest.
+		return distToRay < 0.1 ? distToRayOrigin : Float.POSITIVE_INFINITY;
+	}
+	
+	
+	
 }
