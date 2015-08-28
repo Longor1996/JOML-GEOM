@@ -1,6 +1,5 @@
 package org.joml.geom;
 
-import org.joml.FrustumCuller;
 import org.joml.Vector3f;
 
 /**
@@ -450,44 +449,6 @@ public class AABBf {
 		}
 		
 		return out;
-	}
-	
-	/**
-	 * @return True, if this {@link AABBf} overlaps the sphere defined by the given position and radius. False if not.
-	 **/
-	public boolean overlapWithSphere(Vector3f position, float radius) {
-		return minDistanceSquared(position) <= (radius*radius);
-	}
-	
-	/**
-	 * Does the box/frustum intersection test as defined in {@link FrustumCuller}.
-	 * @see FrustumCullerisAabInsideFrustum(minX, minY, minZ, maxX, maxY, maxZ)
-	 * @return True, if this AABB intersects the given frustum. False if not.
-	 **/
-	public boolean isAabbInsideFrustum(FrustumCuller culler) {
-		return culler.isAabInsideFrustum(
-				originX - extentX,
-				originY - extentY,
-				originZ - extentZ,
-				originX + extentX,
-				originY + extentY,
-				originZ + extentZ
-		) == -1;
-	}
-	
-	/**
-	 * Does the box/frustum intersection test as defined in {@link FrustumCuller}.
-	 * @see FrustumCullerisAabInsideFrustum(minX, minY, minZ, maxX, maxY, maxZ)
-	 **/
-	public int isAabbInsideFrustum_rpi(FrustumCuller culler) {
-		return culler.isAabInsideFrustum(
-				originX - extentX,
-				originY - extentY,
-				originZ - extentZ,
-				originX + extentX,
-				originY + extentY,
-				originZ + extentZ
-		);
 	}
 	
 }
