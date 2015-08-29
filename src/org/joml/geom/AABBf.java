@@ -16,6 +16,38 @@ import org.joml.Vector3f;
  **/
 public class Aabbf {
 	
+	public static final Aabbf createNewAabbFromMinMax(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+		Aabbf aabb = new Aabbf();
+		
+		// origin = (min+max)/2 = minPlusMax/2
+		aabb.originX = (minX+maxX) / 2f;
+		aabb.originY = (minY+maxY) / 2f;
+		aabb.originZ = (minZ+maxZ) / 2f;
+		
+		// extent = (max-min)/2 = size/2
+		aabb.extentX = (maxX-minX) / 2f;
+		aabb.extentY = (maxY-minY) / 2f;
+		aabb.extentZ = (maxZ-minZ) / 2f;
+		
+		return aabb;
+	}
+	
+	public static final Aabbf createNewAabbFromMinMax(Vector3f min, Vector3f max) {
+		Aabbf aabb = new Aabbf();
+		
+		// origin = (min+max)/2 = minPlusMax/2
+		aabb.originX = (min.x+max.x) / 2f;
+		aabb.originY = (min.y+max.y) / 2f;
+		aabb.originZ = (min.z+max.z) / 2f;
+		
+		// extent = (max-min)/2 = size/2
+		aabb.extentX = (max.x-min.x) / 2f;
+		aabb.extentY = (max.y-min.y) / 2f;
+		aabb.extentZ = (max.z-min.z) / 2f;
+		
+		return aabb;
+	}
+	
 	/** The extent of the AABB on the X-axis. **/
 	public float extentX;
 	/** The extent of the AABB on the Y-axis. **/
