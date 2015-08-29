@@ -55,6 +55,29 @@ public class Intersections {
 		return aabbA.intersect(aabbB);
 	}
 	
+	public static final boolean intersectAabbWithAabb(Aabbf aabb,
+			float extentX, float extentY, float extentZ, float originX, float originY, float originZ) {
+		// XXX: The 'abs'-method could be inlined manually here.
+		if (abs(originX - aabb.originX) >= (extentX + aabb.extentX) ) return false;
+		if (abs(originY - aabb.originY) >= (extentY + aabb.extentY) ) return false;
+		if (abs(originZ - aabb.originZ) >= (extentZ + aabb.extentZ) ) return false;
+		
+		// We have an overlap
+		return true;
+	}
+	
+	public static final boolean intersectAabbWithAabb(
+			float extentX, float extentY, float extentZ, float originX, float originY, float originZ,
+			float extentXb, float extentYb, float extentZb, float originXb, float originYb, float originZb) {
+		// XXX: The 'abs'-method could be inlined manually here.
+		if (abs(originX - originXb) >= (extentX + extentXb) ) return false;
+		if (abs(originY - originYb) >= (extentY + extentYb) ) return false;
+		if (abs(originZ - originZb) >= (extentZ + extentZb) ) return false;
+		
+		// We have an overlap
+		return true;
+	}
+	
 	public static final boolean intersectSphereWithSphere(Spheref sphereA, Spheref sphereB) {
 		return sphereA.intersect(sphereB);
 	}
