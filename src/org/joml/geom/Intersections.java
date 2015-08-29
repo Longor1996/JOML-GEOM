@@ -6,6 +6,7 @@ import org.joml.Vector3f;
 /**
  * This class contains utility methods for intersections between various geometric shapes.
  * Note: The ray intersection methods always return the distance to the 'hit point', or positive infinity if there is no hit.
+ * Note: No validations what-so-ever are done on the input by this class. NONE!
  **/
 public class Intersections {
 	// The vectors defined here are private for the
@@ -450,6 +451,123 @@ public class Intersections {
 		);
 		
 		return 1;
+	}
+	
+	/**
+	 * @return <ul>
+	 * 					<li> 0: No Intersection
+	 * 					<li> 1: Point Intersection
+	 * 					<li> 2: Line Intersection
+	 * 				</ul>
+	 **/
+	public static final int intersectLineWithPlane(
+			float Sp0X, float Sp0Y, float Sp0Z,
+			float Sp1X, float Sp1Y, float Sp1Z,
+			Vector3f pNormal, Vector3f pPoint, Vector3f store) {
+		// Vector3f  u = Sp1 - Sp0;
+		float uX = Sp1X - Sp0X;
+		float uY = Sp1Y - Sp0Y;
+		float uZ = Sp1Z - Sp0Z;
+		
+		// Vector3f  w = Sp0 - Pn.V0;
+		float wX = Sp0X - pPoint.x;
+		float wY = Sp0Y - pPoint.y;
+		float wZ = Sp0Z - pPoint.z;
+		
+		float D = pNormal.x*uX+pNormal.y*uY+pNormal.z*uZ; // normal DOT u
+		float N = -(pNormal.x*wX+pNormal.y*wY+pNormal.z*wZ); // normal DOT w
+		
+		if (abs(D) < Float.MIN_VALUE) {
+			// segment is parallel to plane
+			if (N == 0)
+				// segment lies in plane
+				return 2;
+			else
+				// no intersection
+				return 0;
+		}
+		
+		// they are not parallel
+		// compute intersect parameter
+		float sI = N / D;
+		if (sI < 0 || sI > 1)
+			// no intersection
+			return 0;
+		
+		// compute segment intersect point
+		// store = S.P0 + sI * u;
+		store.set(
+				Sp0X + sI * uX,
+				Sp0Y + sI * uY,
+				Sp0Z + sI * uZ
+		);
+		
+		return 1;
+	}
+	
+	/**
+	 * This method uses a given plane to cut trough a given AABB, producing 0..6 points.
+	 *
+	 * @param pNormal The normal vector of the cutting plane.
+	 * @param pPoint A point that is located on the cutting plane.
+	 * @param aabb The AABB to cut trough.
+	 * @param store A array of 6 {@link Vector3f} in which the cutting points will be stored in.
+	 **/
+	public static final int intersectAabbWithPlane(Vector3f pNormal, Vector3f pPoint, Aabbf aabb, Vector3f[] store) {
+		float minX = aabb.originX - aabb.extentX;
+		float minY = aabb.originY - aabb.extentY;
+		float minZ = aabb.originZ - aabb.extentZ;
+		float maxX = aabb.originX + aabb.extentX;
+		float maxY = aabb.originY + aabb.extentY;
+		float maxZ = aabb.originZ + aabb.extentZ;
+		
+		int pointPtr = 0;
+		int maximum = 6;
+		
+		// TOP TO BOTTOM
+		if(intersectLineWithPlane(minX, minY, minZ, minX, maxY, minZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		if(intersectLineWithPlane(maxX, minY, minZ, maxX, maxY, minZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		if(intersectLineWithPlane(maxX, minY, maxZ, maxX, maxY, maxZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		if(intersectLineWithPlane(minX, minY, maxZ, minX, maxY, maxZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		
+		// BOTTOM
+		if(intersectLineWithPlane(minX, minY, minZ, maxX, minY, minZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		if(intersectLineWithPlane(minX, minY, maxZ, maxX, minY, maxZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		if(intersectLineWithPlane(minX, minY, minZ, minX, minY, maxZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		if(intersectLineWithPlane(maxX, minY, minZ, maxX, minY, maxZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		
+		// TOP
+		if(intersectLineWithPlane(minX, maxY, minZ, maxX, maxY, minZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		if(intersectLineWithPlane(minX, maxY, maxZ, maxX, maxY, maxZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		if(intersectLineWithPlane(minX, maxY, minZ, minX, maxY, maxZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		if(intersectLineWithPlane(maxX, maxY, minZ, maxX, maxY, maxZ, pNormal, pPoint, store[pointPtr]) == 1) {
+			if(++pointPtr >= maximum)return pointPtr;
+		}
+		
+		
+		return pointPtr;
 	}
 	
 	private static float abs(final float x) {
