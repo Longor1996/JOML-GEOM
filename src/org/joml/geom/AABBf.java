@@ -47,6 +47,10 @@ public class Aabbf {
 		
 		return aabb;
 	}
+
+	public static Aabbf createNewAabbFromMinMax(float[] bounds) {
+		return createNewAabbFromMinMax(bounds[0], bounds[1], bounds[2], bounds[3], bounds[4], bounds[5]);
+	}
 	
 	/** The extent of the AABB on the X-axis. **/
 	public float extentX;
@@ -148,6 +152,22 @@ public class Aabbf {
 	}
 	
 	/**
+	 * Creates a new {@link Aabbf} with the given extent, located at the given origin.
+	 * @param extentXin The extent of this {@link Aabbf} on the X-Axis.
+	 * @param extentYin The extent of this {@link Aabbf} on the Y-Axis.
+	 * @param extentZin The extent of this {@link Aabbf} on the Z-Axis.
+	 * @param origin The origin of this {@link Aabbf}.
+	 **/
+	public Aabbf(float extentXin, float extentYin, float extentZin, Vector3f origin) {
+		extentX = extentXin;
+		extentY = extentYin;
+		extentZ = extentZin;
+		originX = origin.x;
+		originY = origin.y;
+		originZ = origin.z;
+	}
+	
+	/**
 	 * Stores the origin of this {@link Aabbf} in the given vector.
 	 * @param store The vector to store the origin in.
 	 * @return The vector.
@@ -163,6 +183,30 @@ public class Aabbf {
 	 **/
 	public Vector3f getExtent(Vector3f store) {
 		return store.set(extentX, extentY, extentZ);
+	}
+	
+	public float getMinX() {
+		return originX - extentX;
+	}
+	
+	public float getMinY() {
+		return originY - extentY;
+	}
+	
+	public float getMinZ() {
+		return originZ - extentZ;
+	}
+	
+	public float getMaxX() {
+		return originX + extentX;
+	}
+	
+	public float getMaxY() {
+		return originY + extentY;
+	}
+	
+	public float getMaxZ() {
+		return originZ + extentZ;
 	}
 	
 	/**
@@ -443,6 +487,21 @@ public class Aabbf {
 		return true;
 	}
 	
+	public boolean intersectOnX(Aabbf aabb) {
+		if (abs(originX - aabb.originX) >= (extentX + aabb.extentX) ) return false;
+		return true;
+	}
+	
+	public boolean intersectOnY(Aabbf aabb) {
+		if (abs(originY - aabb.originY) >= (extentY + aabb.extentY) ) return false;
+		return true;
+	}
+	
+	public boolean intersectOnZ(Aabbf aabb) {
+		if (abs(originZ - aabb.originZ) >= (extentZ + aabb.extentZ) ) return false;
+		return true;
+	}
+	
 	public static float abs(final float x) {
 		return Float.intBitsToFloat(0x7fffffff & Float.floatToRawIntBits(x));
 	}
@@ -657,6 +716,89 @@ public class Aabbf {
 				p.x >= originX-extentX && p.x <= originX+extentX &&
 				p.y >= originY-extentY && p.y <= originY+extentY &&
 				p.z >= originZ-extentZ && p.z <= originZ+extentZ;
+	}
+	
+	
+	
+	public float getXmovementOverlap(Aabbf aabb, float movementOnX) {
+		if (!intersectOnY(aabb))
+			return movementOnX;
+		
+		if (!intersectOnZ(aabb))
+			return movementOnX;
+		
+		float thisMinX = this.originX - this.extentX;
+		float thisMaxX = this.originX + this.extentX;
+		float aabbMinX = aabb.originX - aabb.extentX;
+		float aabbMaxX = aabb.originX + aabb.extentX;
+		
+		if ((movementOnX > 0D) && (aabbMaxX <= thisMinX)) {
+			float d = thisMinX - aabbMaxX;
+			
+			if (d < movementOnX)
+				movementOnX = d;
+		} else if ((movementOnX < 0D) && (aabbMinX >= thisMaxX)) {
+			float d1 = thisMaxX - aabbMinX;
+			
+			if (d1 > movementOnX)
+				movementOnX = d1;
+		}
+		
+		return movementOnX;
+	}
+	
+	public float getYmovementOverlap(Aabbf aabb, float movementOnY) {
+		if (!intersectOnX(aabb))
+			return movementOnY;
+		
+		if (!intersectOnZ(aabb))
+			return movementOnY;
+		
+		float thisMinY = this.originY - this.extentY;
+		float thisMaxY = this.originY + this.extentY;
+		float aabbMinY = aabb.originY - aabb.extentY;
+		float aabbMaxY = aabb.originY + aabb.extentY;
+		
+		if ((movementOnY > 0D) && (aabbMaxY <= thisMinY)) {
+			float d = thisMinY - aabbMaxY;
+			
+			if (d < movementOnY)
+				movementOnY = d;
+		} else if ((movementOnY < 0D) && (aabbMinY >= thisMaxY)) {
+			float d1 = thisMaxY - aabbMinY;
+			
+			if (d1 > movementOnY)
+				movementOnY = d1;
+		}
+		
+		return movementOnY;
+	}
+	
+	public float getZmovementOverlap(Aabbf aabb, float movementOnZ) {
+		if (!intersectOnX(aabb))
+			return movementOnZ;
+		
+		if (!intersectOnY(aabb))
+			return movementOnZ;
+		
+		float thisMinZ = this.originZ - this.extentZ;
+		float thisMaxZ = this.originZ + this.extentZ;
+		float aabbMinZ = aabb.originZ - aabb.extentZ;
+		float aabbMaxZ = aabb.originZ + aabb.extentZ;
+		
+		if ((movementOnZ > 0.0D) && (aabbMaxZ <= thisMinZ)) {
+			float d = thisMinZ - aabbMaxZ;
+			
+			if (d < movementOnZ)
+				movementOnZ = d;
+		} else if ((movementOnZ < 0.0D) && (aabbMinZ >= thisMaxZ)) {
+			float d1 = thisMaxZ - aabbMinZ;
+			
+			if (d1 > movementOnZ)
+				movementOnZ = d1;
+		}
+		
+		return movementOnZ;
 	}
 	
 }
