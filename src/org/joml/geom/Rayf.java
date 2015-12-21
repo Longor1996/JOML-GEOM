@@ -70,6 +70,36 @@ public class Rayf {
 		return store.set(originX, originY, originZ);
 	}
 	
+	public void setOrigin(float x, float y, float z) {
+		originX = x;
+		originY = y;
+		originZ = z;
+	}
+	
+	public void setOrigin(Vector3f origin) {
+		originX = origin.x;
+		originY = origin.y;
+		originZ = origin.z;
+	}
+	
+	public void setDirection(float x, float y, float z) {
+		directionX = x;
+		directionY = y;
+		directionZ = z;
+	}
+	
+	public void setDirection(Vector3f direction) {
+		directionX = direction.x;
+		directionY = direction.y;
+		directionZ = direction.z;
+	}
+	
+	public void setDirection(Vector4f direction) {
+		directionX = direction.x;
+		directionY = direction.y;
+		directionZ = direction.z;
+	}
+	
 	public Vector3f trace(float t, Vector3f store) {
 		return store.set(originX+directionX*t, originY+directionY*t, originZ+directionZ*t);
 	}
