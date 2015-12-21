@@ -801,4 +801,13 @@ public class Aabbf {
 		return movementOnZ;
 	}
 	
+	public static final void interpolate(Aabbf a, Aabbf b, float lerp, Aabbf out) {
+		out.extentX = a.extentX + (lerp * (b.extentX - a.extentX));
+		out.extentY = a.extentY + (lerp * (b.extentY - a.extentY));
+		out.extentZ = a.extentZ + (lerp * (b.extentZ - a.extentZ));
+		out.originX = a.originX + (lerp * (b.originX - a.originX));
+		out.originY = a.originY + (lerp * (b.originY - a.originY));
+		out.originZ = a.originZ + (lerp * (b.originZ - a.originZ));
+	}
+	
 }
