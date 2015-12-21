@@ -103,13 +103,42 @@ public class Intersections {
 		float NDR = normal.x*rayDirX + normal.y*rayDirY + normal.z*rayDirZ;
 		
 		// float : NNDP = negate (NORMAL dot POINT)
-		float NNDP = -(normal.x*point.x + normal.y*point.y + normal.z*point.x);
+		float NNDP = -(normal.x*point.x + normal.y*point.y + normal.z*point.z);
 		
 		// float : NDO = NORMAL dot RAYPOS
 		float NDO = normal.x*rayOrgX + normal.y*rayOrgY + normal.z*rayOrgZ;
 		
 		// float : RET = -((NDO + NNDP) / NDR)
-		return -((NDO + NNDP) / NDR);
+		float T = -((NDO + NNDP) / NDR);
+		
+		return T > 0 ? T : Float.POSITIVE_INFINITY;
+	}
+	
+	/** Warning: Not yet tested. **/
+	public static final float intersectRayWithPlane(Rayf ray, Vector3f normal, float pointX, float pointY, float pointZ) {
+		// unwrap ray onto stack
+		float rayDirX = ray.directionX;
+		float rayDirY = ray.directionY;
+		float rayDirZ = ray.directionZ;
+		float rayOrgX = ray.originX;
+		float rayOrgY = ray.originY;
+		float rayOrgZ = ray.originZ;
+		
+		// -((normal.dot(ray.origin) + (-normal.dot(Point))) / normal.dot(ray.direction));
+		
+		// float : NDR = NORMAL dot RAYDIR
+		float NDR = normal.x*rayDirX + normal.y*rayDirY + normal.z*rayDirZ;
+		
+		// float : NNDP = negate (NORMAL dot POINT)
+		float NNDP = -(normal.x*pointX + normal.y*pointY + normal.z*pointZ);
+		
+		// float : NDO = NORMAL dot RAYPOS
+		float NDO = normal.x*rayOrgX + normal.y*rayOrgY + normal.z*rayOrgZ;
+		
+		// float : RET = -((NDO + NNDP) / NDR)
+		float T = -((NDO + NNDP) / NDR);
+		
+		return T > 0 ? T : Float.POSITIVE_INFINITY;
 	}
 	
 	public static final float intersectRayWithPositiveXAxisPlane(Rayf ray) {
@@ -138,6 +167,16 @@ public class Intersections {
 	
 	public static final float intersectRayWithPlaneInBox(Rayf ray, Vector3f normal, Vector3f point, Aabbf aabb) {
 		float t = intersectRayWithPlane(ray, normal, point);
+		
+		float px = ray.originX + ray.directionX * t;
+		float py = ray.originY + ray.directionY * t;
+		float pz = ray.originZ + ray.directionZ * t;
+		
+		return aabb.inside(px, py, pz) ? t : Float.POSITIVE_INFINITY;
+	}
+	
+	public static final float intersectRayWithPlaneInBox(Rayf ray, Vector3f normal, float pointX, float pointY, float pointZ, Aabbf aabb) {
+		float t = intersectRayWithPlane(ray, normal, pointX, pointY, pointZ);
 		
 		float px = ray.originX + ray.directionX * t;
 		float py = ray.originY + ray.directionY * t;
@@ -203,6 +242,19 @@ public class Intersections {
 	}
 	
 	public static final float intersectRayWithAabb(Rayf ray, Aabbf aabb) {
+		float tTop   = intersectRayWithPlaneInBox(ray, Intersections.UP   , 0,aabb.getMaxY(),0, aabb);
+		float tBottom= intersectRayWithPlaneInBox(ray, Intersections.DOWN , 0,aabb.getMinY(),0, aabb);
+		
+		float tLeft  = intersectRayWithPlaneInBox(ray, Intersections.LEFT , aabb.getMinX(),0,0, aabb);
+		float tRight = intersectRayWithPlaneInBox(ray, Intersections.RIGHT, aabb.getMaxX(),0,0, aabb);
+		
+		float tFront = intersectRayWithPlaneInBox(ray, Intersections.FRONT, 0,0,aabb.getMaxZ(), aabb);
+		float tBack  = intersectRayWithPlaneInBox(ray, Intersections.BACK , 0,0,aabb.getMinZ(), aabb);
+		
+		return Math.min(tTop, Math.min(tBottom, Math.min(tLeft, Math.min(tRight, Math.min(tFront, tBack)))));
+	}
+	
+	public static final float intersectRayWithAabb_doesNotWork_doNotUse(Rayf ray, Aabbf aabb) {
 		float lbX = aabb.originX - aabb.extentX;
 		float lbY = aabb.originY - aabb.extentY;
 		float lbZ = aabb.originZ - aabb.extentZ;
